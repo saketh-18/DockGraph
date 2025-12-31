@@ -1,5 +1,5 @@
 import yaml
-from base import Connector
+from .base import Connector
 
 
 class TeamsConnector(Connector):

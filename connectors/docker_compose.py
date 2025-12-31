@@ -1,6 +1,6 @@
 import yaml
 import re
-from base import Connector
+from .base import Connector
 
 
 class DockerComposeConnector(Connector):
