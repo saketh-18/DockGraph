@@ -1,3 +1,5 @@
+from cProfile import label
+from platform import node
 from neo4j import GraphDatabase
 from typing import List, Dict, Optional
 
@@ -33,7 +35,7 @@ class QueryEngine:
                 "properties": result["props"],
             }
 
-    def get_nodes(self, type: str, filters: Dict = None) -> List[Dict]:
+    def get_nodes(self, type: str = "", filters: Dict = None) -> List[Dict]:
         """
         Retrieve nodes by type with optional property filters
         """
@@ -41,11 +43,18 @@ class QueryEngine:
 
         where_clause = " AND ".join([f"n.{k} = ${k}" for k in filters])
 
-        query = f"""
-        MATCH (n:{type})
-        {"WHERE " + where_clause if where_clause else ""}
-        RETURN properties(n) AS props
-        """
+        if type == "":
+            query = f"""
+            MATCH (n) 
+            {"WHERE " + where_clause if where_clause else ""}
+            RETURN properties(n) as props
+            """
+        else:
+            query = f"""    
+            MATCH (n:{type})
+            {"WHERE " + where_clause if where_clause else ""}
+            RETURN properties(n) AS props
+            """
 
         with self.driver.session() as session:
             result = session.run(query, **filters)
@@ -82,20 +91,41 @@ class QueryEngine:
                 "type": "team",
                 "properties": result["props"],
             }
+    
+    def get_owned_by_team(self, node_id : str, filters: str = None) -> Optional[Dict]:
+        # finding services, db, caches that are owned by a team with id
+        label_segment = f":{filters}" if filters else ""
 
+        query = f"""
+            MATCH (n {{id: $id}})-[:OWNS]-(t{label_segment})
+            RETURN properties(t) as props
+            """
+        with self.driver.session() as session:
+            result = session.run(
+                query,
+                id=node_id,
+            )
+
+            if not result:
+                return None;
+            
+            return [{
+                "id" : record["props"]["id"],
+                "type" : "team",
+                "properties" : record["props"]
+            } for record in result
+            ] 
     # ---------------- Traversals ----------------
 
-    def downstream(self, node_id: str, edge_types: List[str] = None) -> List[Dict]:
+    def downstream(self, node_id: str, filters: str = None) -> List[Dict]:
         """
         All transitive dependencies (what this node depends on)
         """
-        rel_filter = (
-            ":" + "|".join([e.upper() for e in edge_types])
-            if edge_types else ""
-        )
-
-        query = f"""
-        MATCH (start {{id: $id}})-[{rel_filter}*1..]->(n)
+        
+        label_segment = f":{filters}" if filters else ""
+        
+        query =f"""
+        MATCH (start {{id: $id}})-[]->(n{label_segment})
         RETURN DISTINCT properties(n) AS props, labels(n)[0] AS type
         """
 
@@ -111,17 +141,14 @@ class QueryEngine:
                 for record in result
             ]
 
-    def upstream(self, node_id: str, edge_types: List[str] = None) -> List[Dict]:
+    def upstream(self, node_id: str, filters : str = None) -> List[Dict]:
         """
         All transitive dependents (what breaks if this node fails)
         """
-        rel_filter = (
-            ":" + "|".join([e.upper() for e in edge_types])
-            if edge_types else ""
-        )
-
+        label_segment = f":{filters}" if filters else ""
+            
         query = f"""
-        MATCH (n)-[{rel_filter}*1..]->(target {{id: $id}})
+        MATCH (n{label_segment})-[]->(target {{id: $id}})
         RETURN DISTINCT properties(n) AS props, labels(n)[0] AS type
         """
 
@@ -161,12 +188,12 @@ class QueryEngine:
 
     # ---------------- Impact Analysis ----------------
 
-    def blast_radius(self, node_id: str) -> Dict:
+    def blast_radius(self, node_id: str, filters: str = None) -> Dict:
         """
         Full impact analysis: upstream, downstream, and owning teams
         """
-        downstream_nodes = self.downstream(node_id)
-        upstream_nodes = self.upstream(node_id)
+        downstream_nodes = self.downstream(node_id, filters)
+        upstream_nodes = self.upstream(node_id, filters)
 
         affected_nodes = {
             n["id"]: n for n in downstream_nodes + upstream_nodes

@@ -69,7 +69,6 @@ class DockerComposeConnector(Connector):
 
             properties = {}
 
-            # Extract exposed port (best-effort)
             ports = cfg.get("ports", [])
             if ports:
                 p = ports[0]
@@ -79,7 +78,6 @@ class DockerComposeConnector(Connector):
                     except Exception:
                         pass
 
-            # Carry labels as metadata
             properties.update(cfg.get("labels", {}) or {})
 
             node = {
