@@ -16,10 +16,11 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-context = {}
+
 
 @app.post("/chat")
 def handle_chat(prompt: str):
+    context = {}
     intent = parse_intent(prompt, context)
     
     if intent["intent"] == "unknown":
@@ -30,7 +31,8 @@ def handle_chat(prompt: str):
     executor = Executor();
     result = executor.execute(intent);
     response = format_response(intent, result)
-        
+    
+    print(response);
     
     context["last_entity"] = intent.get("entity_name")
     context["last_entity_type"] = intent.get("entity_type")

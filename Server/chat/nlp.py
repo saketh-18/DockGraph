@@ -92,8 +92,8 @@ def parse_intent(user_input : str, context : Dict) -> Dict:
     try:
         response = chat_completion.choices[0].message.content;
         intent = json.loads(response)
-        print("groq response");
-        pp.pprint(intent);
+        # print("groq response");
+        # pp.pprint(intent);
     except Exception:
         return {"intent": "unknown", "reason": "invalid model output"}
     
