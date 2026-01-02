@@ -12,6 +12,7 @@ interface Message {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -23,7 +24,7 @@ export default function ChatPage() {
       const res = await fetch(`${API_URL}/chat?prompt=${encodeURIComponent(testPrompt)}`);
       console.log(res);
     }
-
+    console.log(API_URL)
     wakeUp();
   }, [])
 
