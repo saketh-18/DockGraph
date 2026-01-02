@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ChatBubble from "../components/ChatBubble";
 import ChatInput from "../components/ChatInput";
 
@@ -15,6 +15,17 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // to wake up render
+    async function wakeUp(){
+      const testPrompt = "who owns payment service";
+      const res = await fetch(`${API_URL}/chat?prompt=${encodeURIComponent(testPrompt)}`);
+      console.log(res);
+    }
+
+    wakeUp();
+  }, [])
 
   const sendMessage = async (text: string) => {
     // USER MESSAGE

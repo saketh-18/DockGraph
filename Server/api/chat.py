@@ -4,7 +4,7 @@ from chat.nlp import parse_intent
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-origins = ["http://localhost:3000"]
+origins = ["http://localhost:3000", "https://dock-graph.vercel.app"]
 
 app = FastAPI()
 
