@@ -4,7 +4,7 @@ from graph.query import QueryEngine
 
 class Executor:
     def __init__(self):
-        self.qe = QueryEngine(password="password")
+        self.qe = QueryEngine()
         
     def execute(self, intent: Dict):
         action = intent.get("intent")

@@ -1,12 +1,28 @@
 from neo4j import GraphDatabase
 from typing import Dict, List
+import os
+from dotenv import load_dotenv
+
+# This looks for a .env file in the current directory
+load_dotenv() # for local
 
 
 class GraphStorage:
     # start a connection
-    def __init__(self, uri="neo4j://127.0.0.1:7687", user="neo4j", password="password"):
-        self.driver = GraphDatabase.driver(uri, auth=(user, password))
-        # self._ensure_indexes()
+
+    def __init__(self):
+        uri = os.getenv("NEO4J_URI")
+        user = os.getenv("NEO4J_USERNAME", "neo4j")
+        password = os.getenv("NEO4J_PASSWORD")
+
+        if not uri:
+            raise RuntimeError("NEO4J_URI is not set")
+
+        self.driver = GraphDatabase.driver(
+            uri,
+            auth=(user, password)
+        )
+        GraphDatabase.driver.verify_connectivity();
 
     # closing connection
     def close(self):

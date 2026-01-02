@@ -4,7 +4,7 @@ from connectors.teams import TeamsConnector
 
 
 def load_graph():
-    storage = GraphStorage(password="password")
+    storage = GraphStorage()
 
     connectors = [
         DockerComposeConnector(path="./data/docker-compose.yml"),
