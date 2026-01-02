@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -6,7 +7,7 @@ import ChatInput from "../components/ChatInput";
 
 interface Message {
   role: "user" | "system";
-  content: string;
+  blocks: any[];
 }
 
 export default function ChatPage() {
@@ -14,27 +15,40 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
 
   const sendMessage = async (text: string) => {
-    const userMsg: Message = { role: "user", content: text };
-    setMessages((prev) => [...prev, userMsg]);
+    // USER MESSAGE
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        blocks: [{ type: "text", message: text }],
+      },
+    ]);
+
     setLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:8000/chat?prompt=${text}`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `http://localhost:8000/chat?prompt=${encodeURIComponent(text)}`,
+        { method: "POST" }
+      );
 
       const data = await res.json();
 
-      const systemMsg: Message = {
-        role: "system",
-        content: JSON.stringify(data.result),
-      };
-
-      setMessages((prev) => [...prev, systemMsg]);
-    } catch (err) {
+      // 🔴 IMPORTANT: result is ONE OBJECT → wrap in array
       setMessages((prev) => [
         ...prev,
-        { role: "system", content: "⚠️ Error contacting server" },
+        {
+          role: "system",
+          blocks: [data.result],
+        },
+      ]);
+    } catch (e) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "system",
+          blocks: [{ type: "text", message: "⚠️ Error contacting server" }],
+        },
       ]);
     } finally {
       setLoading(false);
@@ -44,23 +58,27 @@ export default function ChatPage() {
   return (
     <div className="flex h-screen bg-zinc-950 text-white">
       <div className="flex flex-col w-full max-w-4xl mx-auto p-6">
-        {/* Header */}
         <h1 className="text-2xl font-semibold mb-4 text-center">
           Neo4j Query Assistant
         </h1>
 
-        {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto space-y-4 px-2">
+        <div className="flex-1 overflow-y-auto chat-box space-y-4 px-2">
           {messages.map((msg, i) => (
-            <ChatBubble key={i} role={msg.role} content={msg.content} />
+            <ChatBubble
+              key={i}
+              role={msg.role}
+              blocks={msg.blocks}
+            />
           ))}
 
           {loading && (
-            <ChatBubble role="system" content="Thinking..." />
+            <ChatBubble
+              role="system"
+              blocks={[{ type: "text", message: "Thinking..." }]}
+            />
           )}
         </div>
 
-        {/* Input */}
         <ChatInput onSend={sendMessage} />
       </div>
     </div>

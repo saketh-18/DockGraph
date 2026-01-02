@@ -29,10 +29,15 @@ def handle_chat(prompt: str):
         }
         
     executor = Executor();
+    print("[API] intent:", intent)
     result = executor.execute(intent);
+    print("[API] raw result:", result)
     response = format_response(intent, result)
-    
+    print("[API] formatted response")
     print(response);
+    
+    if intent["intent"] == "path":
+        response = result;
     
     context["last_entity"] = intent.get("entity_name")
     context["last_entity_type"] = intent.get("entity_type")

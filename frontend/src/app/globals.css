@@ -24,3 +24,17 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Apply to the element you want to hide the scrollbar for */
+.chat-box {
+  /* For Firefox */
+  scrollbar-width: none;
+
+  /* For Internet Explorer and older Edge */
+  -ms-overflow-style: none;
+}
+
+/* For Chrome, Safari, and newer Edge (Webkit) */
+.chat-box::-webkit-scrollbar {
+  display: none;
+}

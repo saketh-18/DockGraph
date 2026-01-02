@@ -10,11 +10,11 @@ class Executor:
         action = intent.get("intent")
         e_name = intent.get("entity_name")
         e_type = intent.get("entity_type")
-        if intent.get("path"):
-            f_type = intent.get("path", {}).get("from_type")
-            f_name = intent.get("path", {}).get("from_name")
-            t_name = intent.get("path", {}).get("to_name")
-            t_type = intent.get("path", {}).get("to_type")
+        path_info = intent.get("path") or {}
+        f_type = path_info.get("from_type") or None
+        f_name = path_info.get("from_name") or None
+        t_name = path_info.get("to_name") or None
+        t_type = path_info.get("to_type") or None
         filters = intent.get("filters")
         
         if action == "get_owner":
@@ -30,4 +30,17 @@ class Executor:
         if action == "blast_radius":
             return self.qe.blast_radius(f"{e_type}:{e_name}", filters);
         if action == "path":
-            return self.qe.path(f"{f_type}:{f_name}", f"{t_type}:{t_name}")         
+            # Be defensive: if path parts are missing, try to derive from top-level entity
+            if not (f_type and f_name):
+                f_type = f_type or e_type
+                f_name = f_name or e_name
+
+            # If still missing required pieces, log and return empty path
+            if not (f_type and f_name and t_type and t_name):
+                print("[Executor] path intent missing fields:", intent)
+                return []
+
+            start_id = f"{f_type}:{f_name}"
+            end_id = f"{t_type}:{t_name}"
+            print(f"[Executor] path from {start_id} to {end_id}")
+            return self.qe.path(start_id, end_id)

@@ -7,11 +7,11 @@ from typing import Dict
 import api
 from groq import Groq
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-# This looks for a .env file in the current directory
-load_dotenv()
-groq_api_key = os.getenv("groq_api_key")
+# # This looks for a .env file in the current directory
+# load_dotenv() # for local
+groq_api_key = os.getenv("GROQ_API_KEY")
 
 pp = pprint.PrettyPrinter(indent=4);
 client = Groq(api_key=groq_api_key)
