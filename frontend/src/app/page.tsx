@@ -10,6 +10,8 @@ interface Message {
   blocks: any[];
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,7 @@ export default function ChatPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:8000/chat?prompt=${encodeURIComponent(text)}`,
+        `${API_URL}/chat?prompt=${encodeURIComponent(text)}`,
         { method: "POST" }
       );
 
@@ -59,7 +61,7 @@ export default function ChatPage() {
     <div className="flex h-screen bg-zinc-950 text-white">
       <div className="flex flex-col w-full max-w-4xl mx-auto p-6">
         <h1 className="text-2xl font-semibold mb-4 text-center">
-          Neo4j Query Assistant
+          DockGraph - Neo4j Query Assistant
         </h1>
 
         <div className="flex-1 overflow-y-auto chat-box space-y-4 px-2">
