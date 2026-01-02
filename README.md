@@ -64,7 +64,7 @@ Config files (docker-compose.yml, teams.yaml, data/)
   - Query engine (`graph/query.py`): Implements `upstream()`, `downstream()`, path and ownership traversals with safeguards against cycles.
   - Chat (`chat/`, `Server/api/chat.py`, `frontend/`): Maps natural language to intents/queries, executes graph queries, and formats results for the UI.
 
-## C. Design Questions (3–5 sentences each)
+## C. Design Questions
 
 1. Connector pluggability: To add a new connector (for example, Terraform), implement the small `Connector` interface in `connectors/base.py` and create a new module `connectors/terraform.py` that parses Terraform state or HCL into the canonical node/edge shape. Register the connector in `connectors/__init__.py` or add it to the connector discovery routine so it is invoked during ingestion. Because connectors return plain node/edge records and the graph layer performs upserts, no core graph code changes are necessary. Tests and a small mapping example should accompany the connector so semantics are clear for other users.
 
@@ -88,7 +88,7 @@ Config files (docker-compose.yml, teams.yaml, data/)
 
 ## E. AI Usage
 
-- **Where AI helped most:** AI assisted with drafting natural-language paraphrases, suggested structure for README content, and helped design the intent-mapping approach. It was also used experimentally to prototype LLM-to-query translation snippets.
+- **Where AI helped most:** AI assisted with drafting natural-language paraphrases, suggested structure for README content
 - **Where I corrected AI suggestions:** I constrained AI outputs to avoid hallucination, validated any proposed query against the schema, and rewrote portions that assumed production-grade features (transactions, scaling) that the prototype did not implement. I also corrected technical details to match the actual code layout and package names.
 - **What I learned about AI-assisted development:** AI speeds up drafting and ideation, but human oversight is essential for correctness and safety — especially when the AI suggests code or architecture that doesn't match the implemented surface area. Keeping the AI-in-the-loop for formatting and suggestions while enforcing deterministic, validated execution paths gives the best balance.
 
