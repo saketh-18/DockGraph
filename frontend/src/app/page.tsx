@@ -12,21 +12,22 @@ interface Message {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // to wake up render
-    async function wakeUp(){
+    async function wakeUp() {
       const testPrompt = "who owns payment service";
-      const res = await fetch(`${API_URL}/chat?prompt=${encodeURIComponent(testPrompt)}`);
+      const res = await fetch(
+        `${API_URL}/chat?prompt=${encodeURIComponent(testPrompt)}`,
+      );
       console.log(res);
     }
-    console.log(API_URL)
+    console.log(API_URL);
     wakeUp();
-  }, [])
+  }, []);
 
   const sendMessage = async (text: string) => {
     // USER MESSAGE
@@ -43,10 +44,17 @@ export default function ChatPage() {
     try {
       const res = await fetch(
         `${API_URL}/chat?prompt=${encodeURIComponent(text)}`,
-        { method: "POST" }
+        { method: "POST" },
       );
 
       const data = await res.json();
+      console.log("=== API Response ===");
+      console.log("Full response:", data);
+      console.log("Result object:", data.result);
+      console.log("Type:", data.result?.type);
+      console.log("Message:", data.result?.message);
+      console.log("Data:", data.result?.data);
+      console.log("===================");
 
       // 🔴 IMPORTANT: result is ONE OBJECT → wrap in array
       setMessages((prev) => [
@@ -56,7 +64,8 @@ export default function ChatPage() {
           blocks: [data.result],
         },
       ]);
-    } catch (e) {
+    } catch (error) {
+      console.error("Error fetching chat response:", error);
       setMessages((prev) => [
         ...prev,
         {
@@ -78,11 +87,7 @@ export default function ChatPage() {
 
         <div className="flex-1 overflow-y-auto chat-box space-y-4 px-2">
           {messages.map((msg, i) => (
-            <ChatBubble
-              key={i}
-              role={msg.role}
-              blocks={msg.blocks}
-            />
+            <ChatBubble key={i} role={msg.role} blocks={msg.blocks} />
           ))}
 
           {loading && (

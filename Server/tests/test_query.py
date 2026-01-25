@@ -1,7 +1,7 @@
 from graph.query import QueryEngine
 import pprint
 
-qe = QueryEngine(password="password")
+qe = QueryEngine()
 
 pp = pprint.PrettyPrinter(indent=4);
 
@@ -13,6 +13,7 @@ pp = pprint.PrettyPrinter(indent=4);
 # print(qe.blast_radius("database:orders-db"))
 # pp.pprint(qe.get_owner("database:orders-db"));
 
-pp.pprint(qe.get_owned_by_team(node_id="team:orders-team"));
+# pp.pprint(qe.get_owned_by_team("team:orders-team"));
 
+pp.pprint(qe.check_node_existence("service:payment-service"))
 qe.close()

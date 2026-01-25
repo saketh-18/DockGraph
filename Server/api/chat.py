@@ -1,8 +1,6 @@
-from chat.executor import Executor
-from chat.formatter import format_response
-from chat.nlp import parse_intent
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from chat.nlp import NLP
 
 origins = ["http://localhost:3000", "https://dock-graph.vercel.app"]
 
@@ -20,31 +18,20 @@ app.add_middleware(
 
 @app.post("/chat")
 def handle_chat(prompt: str):
-    context = {}
-    intent = parse_intent(prompt, context)
+    caller = NLP()
+    response = caller.llm_agent(prompt)
     
-    if intent["intent"] == "unknown":
+    # Convert Pydantic model to dict for JSON serialization
+    if response:
         return {
-            "result" : "I'm not sure what you mean. Can you clarify?"
+            "result": response.model_dump()
         }
-        
-    executor = Executor();
-    print("[API] intent:", intent)
-    result = executor.execute(intent);
-    print("[API] raw result:", result)
-    response = format_response(intent, result)
-    print("[API] formatted response")
-    print(response);
-    
-    if intent["intent"] == "path":
-        response = result;
-    
-    context["last_entity"] = intent.get("entity_name")
-    context["last_entity_type"] = intent.get("entity_type")
-    context["last_intent"] = intent.get("intent")
-    
     
     return {
-        "result" : response
+        "result": {
+            "type": "error",
+            "message": "Failed to process request",
+            "data": None
+        }
     }
     

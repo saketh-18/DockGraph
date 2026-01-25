@@ -1,32 +1,29 @@
-from .nlp import parse_intent
-from .executor import Executor
-from .formatter import format_response
-
+from .nlp import NLP
+import json
+from .cache import Cache
 def chat():
-    executor = Executor()
-    context = {}
-
+    caller = NLP()
     print("Graph Assistant (type 'exit' to quit)")
 
     while True:
         user_input = input("\n> ")
         if user_input.lower() == "exit":
             break
-
-        intent = parse_intent(user_input, context)
-
-        if intent["intent"] == "unknown":
-            print("I'm not sure what you mean. Can you clarify?")
-            continue
-
-        result = executor.execute(intent)
-        response = format_response(intent, result)
-        print(response)
-
-        # Update context
-        context["last_entity"] = intent.get("entity_name")
-        context["last_entity_type"] = intent.get("entity_type")
-        context["last_intent"] = intent.get("intent")
+        
+        response = caller.llm_agent(user_input)
+        
+        # Pretty print the structured response
+        if isinstance(response, dict):
+            if "result" in response and isinstance(response["result"], dict):
+                result = response["result"]
+                if result.get("status") == "success":
+                    print(f"\n✓ {json.dumps(result['data'], indent=2)}")
+                else:
+                    print(f"\n✗ Error: {result.get('message')}")
+            else:
+                print(json.dumps(response, indent=2))
+        else:
+            print(response)
 
 if __name__ == "__main__":
     chat()
