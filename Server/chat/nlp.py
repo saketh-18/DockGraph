@@ -42,6 +42,7 @@ KEY RULES:
 3. Infer the correct node type from the user's request
 4. Fix any typos in node names to match valid graph nodes
 5. For filters parameter, pass only the type string: 'service', 'database', 'cache', or None
+6. When the Node or activity is not mentioned in question try to answer that based on history passed 
 
 Tool-specific guidance:
 - get_owner(node_id): Pass a service/database/cache node to find its owner team
